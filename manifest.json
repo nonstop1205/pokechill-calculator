@@ -1,0 +1,18 @@
+{
+  "name": "PokeChill 配招伤害计算器",
+  "short_name": "PokeChill计算器",
+  "description": "截图识别招式，自动计算最优配招和一轮总伤害",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F3F4F6",
+  "theme_color": "#4F46E5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
