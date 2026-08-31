@@ -32,6 +32,7 @@
       --radius-input: 14px;
       --radius-btn: 12px;
       --shadow-card: 0 4px 20px rgba(0,0,0,0.06);
+      --shadow-hover: 0 4px 16px rgba(79,70,229,0.25);
     }
 
     * {
@@ -153,13 +154,6 @@
       box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
     }
 
-    textarea {
-      resize: vertical;
-      min-height: 120px;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
     .btn {
       padding: 12px 18px;
       border: none;
@@ -220,74 +214,123 @@
       align-items: center;
     }
 
-    .actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-top: 10px;
-      flex-wrap: wrap;
+    /* 属性颜色映射 */
+    .type-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      min-width: 32px;
     }
 
+    select.bg-type { transition: background-color 0.3s, color 0.3s; }
+
+    /* ========== 候选招式条目 ========== */
     .move-row {
-      padding: 10px 12px;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      margin-bottom: 6px;
-      background: #FAFBFC;
-      transition: border-color 0.2s;
-    }
-
-    .move-row:focus-within {
-      border-color: var(--border-focus);
+      margin-bottom: 8px;
+      background: transparent;
+      border: none;
+      padding: 0;
     }
 
     .move-row-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      cursor: pointer;
       gap: 8px;
+      background: #2C2C2C;
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      border: 2px solid #4B5563;
+      transition: transform 0.1s ease, border-color 0.2s ease;
+      position: relative;
     }
 
-    .move-row-summary {
+    .move-row-header:active {
+      transform: scale(0.98);
+    }
+
+    .move-row-header.move-physical { border-color: #22C55E; }
+    .move-row-header.move-special { border-color: #A855F7; }
+    .move-row-header.move-buff { border-color: #9CA3AF; }
+
+    .move-entry-left {
       display: flex;
       align-items: center;
       gap: 6px;
-      flex-wrap: wrap;
-      font-size: 14px;
-      font-weight: 600;
+      flex: 1;
+      min-width: 0;
     }
 
-    .move-row-summary .mv-name {
-      color: var(--title);
-    }
-
-    .move-tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 11px;
+    .move-entry-name {
+      color: #fff;
       font-weight: 700;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .tag-physical { background: #FEE2E2; color: #B91C1C; }
-    .tag-special { background: #DBEAFE; color: #1D4ED8; }
-    .tag-buff { background: #FEF3C7; color: #B45309; }
-    .tag-type { background: #E0E7FF; color: #3730A3; }
+    .move-entry-detail {
+      color: #9CA3AF;
+      font-size: 12px;
+      white-space: nowrap;
+    }
 
+    .move-entry-type {
+      flex-shrink: 0;
+      margin-left: 2px;
+    }
+
+    .move-entry-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #9CA3AF;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 6px 8px;
+      transition: color 0.2s;
+      flex-shrink: 0;
+      border-radius: 6px;
+    }
+    .delete-btn:hover { color: #FCA5A5; background: rgba(255,0,0,0.12); }
+    .delete-btn:active { color: #fff; background: rgba(255,0,0,0.25); }
+
+    .chevron {
+      font-size: 10px;
+      color: #9CA3AF;
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+      padding: 4px;
+    }
+    .chevron.open { transform: rotate(180deg); }
+
+    /* 编辑详情区域 */
     .move-row-detail {
       display: none;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
+      margin-top: 4px;
+      padding: 10px 12px;
+      background: #F9FAFB;
+      border: 1px solid var(--border);
+      border-radius: 10px;
       gap: 8px;
       flex-wrap: wrap;
       align-items: flex-end;
     }
 
-    .move-row-detail.show {
-      display: flex;
-    }
+    .move-row-detail.show { display: flex; }
 
     .move-row-detail input,
     .move-row-detail select {
@@ -300,30 +343,15 @@
     .move-row-detail .mCategory { min-width: 80px; flex: 0 0 auto; }
     .move-row-detail .mPower { width: 70px; flex: 0 0 auto; }
 
-    .delete-btn {
-      background: none;
-      border: none;
-      color: #9CA3AF;
-      font-size: 18px;
-      cursor: pointer;
-      padding: 4px 6px;
-      transition: color 0.2s;
+    .buff-config-inline {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
-    .delete-btn:hover { color: var(--danger); }
-
-    .chevron {
-      transition: transform 0.25s ease;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .chevron.open { transform: rotate(180deg); }
-
-    .search-wrapper {
-      position: relative;
-    }
-
+    /* 搜索 */
+    .search-wrapper { position: relative; }
     .search-results {
       position: absolute;
       top: calc(100% + 4px);
@@ -337,7 +365,6 @@
       z-index: 100;
       box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     }
-
     .search-item {
       padding: 10px 14px;
       cursor: pointer;
@@ -345,11 +372,11 @@
       font-size: 14px;
       transition: background 0.15s;
     }
-
     .search-item:last-child { border-bottom: none; }
     .search-item:hover, .search-item:active { background: #EEF2FF; }
     .search-item .si-type { color: var(--muted); font-size: 12px; margin-left: 4px; }
 
+    /* ========== 结果展示 ========== */
     .result-panel {
       background: #EFF6FF;
       border: 1.5px solid #BFDBFE;
@@ -365,18 +392,46 @@
       margin-bottom: 6px;
     }
 
-    .result-panel .seq {
-      margin: 6px 0;
-      font-size: 14px;
-      line-height: 1.6;
-      font-weight: 600;
+    .result-moveset {
+      margin: 8px 0;
+      padding: 10px 12px;
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #E5E7EB;
     }
 
-    .result-panel .detail {
+    .result-move-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      font-size: 14px;
+      border-bottom: 1px solid #F3F4F6;
+    }
+
+    .result-move-item:last-child { border-bottom: none; }
+
+    .result-move-name {
+      font-weight: 700;
+      color: var(--title);
+      min-width: 80px;
+    }
+
+    .result-move-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      margin-left: 2px;
+    }
+
+    .result-move-dmg {
+      margin-left: auto;
+      font-weight: 600;
+      color: var(--primary);
       font-size: 13px;
-      color: #4B5563;
-      margin-top: 6px;
-      line-height: 1.8;
     }
 
     .result-panel .rank-badge {
@@ -390,6 +445,31 @@
       margin-bottom: 4px;
     }
 
+    .result-detail-toggle {
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: #E0E7FF;
+      color: var(--primary);
+      border: none;
+      font-weight: 600;
+    }
+
+    .result-detail-section {
+      display: none;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #4B5563;
+      line-height: 1.8;
+      padding: 8px 10px;
+      background: #F9FAFB;
+      border-radius: 8px;
+    }
+    .result-detail-section.show { display: block; }
+
+    /* 底部固定操作栏 */
     .bottom-bar {
       position: fixed;
       bottom: 0;
@@ -413,7 +493,6 @@
       margin-bottom: 8px;
       flex-wrap: wrap;
     }
-
     .enemy-set-row select {
       flex: 1;
       min-width: 100px;
@@ -426,30 +505,12 @@
       .grid-4 { grid-template-columns: repeat(2, 1fr); }
       .btn { font-size: 14px; padding: 11px 14px; }
     }
-
-    .spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 2px solid #fff;
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .buff-config-inline {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
   </style>
 </head>
 <body>
 <div class="container">
   <div class="app-title">⚡ PokeChill 配招计算器</div>
-  <div class="app-subtitle">粘贴豆包识别结果 · 最优配招 · 一轮总伤害</div>
+  <div class="app-subtitle">粘贴识别结果 · 最优配招 · 一轮总伤害</div>
 
   <!-- 规则卡片 -->
   <div class="note">
@@ -459,36 +520,15 @@
     <b>敌方克制</b>：绝佳 ×1.5，不佳 ×0.5，免疫 ×0，双属性相乘
   </div>
 
-  <!-- 批量导入 -->
-  <div class="card">
-    <h2><span class="icon">📋</span>粘贴豆包识别结果</h2>
-    <p class="muted" style="margin-top:-6px;font-size:13px;">每行一个招式，格式：招式名,属性,物理/特殊/变化,威力[,buff类型,倍率]</p>
-    <textarea id="batchInput" placeholder="疯狂伏特,电,物理,120&#10;十万伏特,电,特殊,90&#10;铁尾,钢,物理,100&#10;剑舞,一般,变化,0,attack,2"></textarea>
-    <div class="btn-row" style="margin-top:10px;">
-      <button class="btn btn-primary" id="batchImport">📥 批量导入</button>
-      <button class="btn btn-danger" id="clearAll">🗑 清空全部招式</button>
-    </div>
-    <div id="importStatus" class="muted" style="margin-top:8px;font-size:13px;"></div>
-  </div>
-
-  <!-- 搜索招式 -->
-  <div class="card">
-    <h2><span class="icon">🔍</span>搜索招式</h2>
-    <div class="search-wrapper">
-      <input id="moveSearch" placeholder="拼音首字母或名称，如 ftgj / 伏特攻击" autocomplete="off">
-      <div id="searchResults" class="search-results hidden"></div>
-    </div>
-  </div>
-
   <!-- 宝可梦基础 -->
   <div class="card">
     <h2><span class="icon">🎯</span>宝可梦基础</h2>
     <div class="grid-4">
       <label>属性1
-        <select id="pokeType1"></select>
+        <select id="pokeType1" class="bg-type"></select>
       </label>
       <label>属性2
-        <select id="pokeType2"></select>
+        <select id="pokeType2" class="bg-type"></select>
       </label>
       <label>攻击
         <input id="atk" type="number" min="1" placeholder="—">
@@ -502,14 +542,51 @@
         <select id="weather"></select>
       </label>
       <div id="customWeather" class="hidden" style="display:flex;gap:6px;">
-        <select id="customWeatherType1"></select>
-        <select id="customWeatherType2"></select>
+        <select id="customWeatherType1" class="bg-type"></select>
+        <select id="customWeatherType2" class="bg-type"></select>
       </div>
       <label>交叉倍率
         <input id="crossMult" type="number" step="0.1" min="1" value="1.3">
       </label>
       <label>天气倍率
         <input id="weatherMult" type="number" step="0.1" min="1" value="1.5">
+      </label>
+    </div>
+  </div>
+
+  <!-- 豆包识别结果粘贴 -->
+  <div class="card">
+    <h2><span class="icon">📋</span>豆包识别结果</h2>
+    <p class="muted" style="margin-top:-6px;font-size:13px;">粘贴豆包识别结果，每行一个招式：名称,属性,分类,威力</p>
+    <textarea id="pasteInput" placeholder="藤鞭,草,物理,45&#10;溶解液,毒,特殊,40&#10;剑舞,一般,变化,0,attack,2"></textarea>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-primary" id="parsePaste">解析并添加</button>
+      <button class="btn btn-sm" id="clearPaste">清空</button>
+    </div>
+  </div>
+
+  <!-- 搜索招式 -->
+  <div class="card">
+    <h2><span class="icon">🔍</span>搜索招式</h2>
+    <div class="search-wrapper">
+      <input id="moveSearch" placeholder="拼音首字母或名称，如 ftgj / 伏特攻击" autocomplete="off">
+      <div id="searchResults" class="search-results hidden"></div>
+    </div>
+  </div>
+
+  <!-- 候选招式 -->
+  <div class="card">
+    <h2><span class="icon">📋</span>候选招式 <span id="moveCount" style="font-size:13px;color:var(--muted);font-weight:400;">(0/20)</span></h2>
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn btn-sm" id="addMove">＋ 手动添加</button>
+      <button class="btn btn-sm btn-danger" id="clearAll">🗑 清空全部</button>
+      <button class="btn btn-sm" id="expandAll">▾ 全部展开</button>
+    </div>
+    <div id="moveList"></div>
+    <div class="btn-row" style="margin-top:10px;">
+      <label style="font-size:13px;font-weight:600;flex-direction:row;align-items:center;gap:6px;">
+        <input type="checkbox" id="buffFirst" checked style="width:auto;">
+        Buff必须第一招
       </label>
     </div>
   </div>
@@ -522,22 +599,6 @@
       <button class="btn btn-sm" id="addEnemySet">＋ 手动添加</button>
     </div>
     <div id="enemySets"></div>
-  </div>
-
-  <!-- 候选招式 -->
-  <div class="card">
-    <h2><span class="icon">📋</span>候选招式 <span id="moveCount" style="font-size:13px;color:var(--muted);font-weight:400;">(0/20)</span></h2>
-    <div class="btn-row" style="margin-bottom:8px;">
-      <button class="btn btn-sm" id="addMove">＋ 手动添加</button>
-      <button class="btn btn-sm" id="expandAll">▾ 全部展开</button>
-    </div>
-    <div id="moveList"></div>
-    <div class="btn-row" style="margin-top:10px;">
-      <label style="font-size:13px;font-weight:600;flex-direction:row;align-items:center;gap:6px;">
-        <input type="checkbox" id="buffFirst" checked style="width:auto;">
-        Buff必须第一招
-      </label>
-    </div>
   </div>
 
   <!-- 结果 -->
@@ -558,7 +619,14 @@
   // ========== 属性数据 ==========
   var TYPES = ["一般","火","水","草","电","冰","格斗","毒","地面","飞行","超能力","虫","岩石","幽灵","龙","恶","钢","妖精"];
 
-  // 属性克制表
+  var TYPE_COLORS = {
+    "一般": "#a8a28c", "火": "#e4722c", "水": "#6399e8", "草": "#63b946",
+    "电": "#f1cd2b", "冰": "#86d2d0", "格斗": "#b83c2e", "毒": "#8c3f9c",
+    "地面": "#d6b357", "飞行": "#b3a0e8", "超能力": "#ed5c87", "虫": "#91a827",
+    "岩石": "#b4943e", "幽灵": "#674e82", "龙": "#653fc9", "恶": "#685041",
+    "钢": "#a8abb5", "妖精": "#e897b2"
+  };
+
   var typeChart = {
     "虫": {"虫":1,"恶":1.5,"龙":1,"电":1,"妖精":0.5,"格斗":0.5,"火":0.5,"飞行":0.5,"幽灵":0.5,"草":1.5,"地面":1,"冰":1,"一般":1,"毒":0.5,"超能":1.5,"岩石":1,"钢":0.5,"水":1},
     "恶": {"虫":1,"恶":0.5,"龙":1,"电":1,"妖精":0.5,"格斗":0.5,"火":1,"飞行":1,"幽灵":1.5,"草":1,"地面":1,"冰":1,"一般":1,"毒":1,"超能":1.5,"岩石":1,"钢":1,"水":1},
@@ -580,7 +648,6 @@
     "水": {"虫":1,"恶":1,"龙":0.5,"电":1,"妖精":1,"格斗":1,"火":1.5,"飞行":1,"幽灵":1,"草":0.5,"地面":1.5,"冰":1,"一般":1,"毒":1,"超能":1,"岩石":1.5,"钢":0.5,"水":0.5}
   };
 
-  // 天气预设
   var WEATHER_PRESETS = [
     { name:"无", types:[], note:"" },
     { name:"大晴天", types:["火"], note:"火" },
@@ -595,7 +662,6 @@
     { name:"自定义天气", types:[], note:"自定义" }
   ];
 
-  // ========== 招式库 ==========
   var MOVE_DB = [
     {name:"疯狂伏特", type:"电", category:"物理", power:120, pinyin:"fkft"},
     {name:"雷电拳", type:"电", category:"物理", power:75, pinyin:"ldq"},
@@ -733,13 +799,13 @@
   var calcCurrentBtn = $('calcCurrent');
   var calcBestBtn = $('calcBest');
   var resultsDiv = $('results');
-  var batchInput = $('batchInput');
-  var batchImportBtn = $('batchImport');
-  var importStatus = $('importStatus');
+  var pasteInput = $('pasteInput');
+  var parsePasteBtn = $('parsePaste');
+  var clearPasteBtn = $('clearPaste');
 
   var MAX_MOVES = 20;
 
-  // ========== 初始化下拉框 ==========
+  // ========== 初始化 ==========
   function populateSelect(select, options, selectedValue) {
     select.innerHTML = '';
     options.forEach(function(opt) {
@@ -751,20 +817,51 @@
     });
   }
 
+  function updateSelectBackground(select) {
+    var val = select.value;
+    if (val === '无') {
+      select.style.backgroundColor = '#fff';
+      select.style.color = '#1F2937';
+      return;
+    }
+    var color = TYPE_COLORS[val] || '#fff';
+    select.style.backgroundColor = color;
+    select.style.color = '#fff';
+  }
+
   function initStaticSelects() {
     var typeOptions = TYPES.map(function(t){ return { value:t, label:t }; });
     var typeOptionsWithNone = [{ value:'无', label:'无' }].concat(typeOptions);
     populateSelect(pokeType1, typeOptionsWithNone, '无');
     populateSelect(pokeType2, typeOptionsWithNone, '无');
     var weatherOptions = WEATHER_PRESETS.map(function(w){
-      return {
-        value: w.name,
-        label: w.name === '无' ? '无' : (w.name + (w.note ? '（' + w.note + '）' : ''))
-      };
+      return { value:w.name, label:w.name === '无' ? '无' : (w.name + (w.note ? '（' + w.note + '）' : '')) };
     });
     populateSelect(weatherSel, weatherOptions, '无');
     populateSelect(customWeatherType1, typeOptions, '火');
     populateSelect(customWeatherType2, typeOptionsWithNone, '无');
+    updateSelectBackground(pokeType1);
+    updateSelectBackground(pokeType2);
+    updateSelectBackground(customWeatherType1);
+    updateSelectBackground(customWeatherType2);
+  }
+
+  pokeType1.addEventListener('change', function(){ updateSelectBackground(pokeType1); updateAllMoveTypeOptions(); });
+  pokeType2.addEventListener('change', function(){ updateSelectBackground(pokeType2); updateAllMoveTypeOptions(); });
+  customWeatherType1.addEventListener('change', function(){ updateSelectBackground(customWeatherType1); });
+  customWeatherType2.addEventListener('change', function(){ updateSelectBackground(customWeatherType2); });
+  weatherSel.addEventListener('change', function(){
+    customWeather.classList.toggle('hidden', weatherSel.value !== '自定义天气');
+  });
+
+  function getWeatherTypes() {
+    if (weatherSel.value === '自定义天气') {
+      var types = [customWeatherType1.value];
+      if (customWeatherType2.value !== '无') types.push(customWeatherType2.value);
+      return types;
+    }
+    var preset = WEATHER_PRESETS.find(function(w){ return w.name === weatherSel.value; });
+    return preset ? preset.types : [];
   }
 
   function updateTypeOptions(select, selectedValue) {
@@ -782,22 +879,6 @@
     Array.prototype.forEach.call(selects, function(sel){
       updateTypeOptions(sel, sel.value);
     });
-  }
-
-  pokeType1.addEventListener('change', updateAllMoveTypeOptions);
-  pokeType2.addEventListener('change', updateAllMoveTypeOptions);
-  weatherSel.addEventListener('change', function(){
-    customWeather.classList.toggle('hidden', weatherSel.value !== '自定义天气');
-  });
-
-  function getWeatherTypes() {
-    if (weatherSel.value === '自定义天气') {
-      var types = [customWeatherType1.value];
-      if (customWeatherType2.value !== '无') types.push(customWeatherType2.value);
-      return types;
-    }
-    var preset = WEATHER_PRESETS.find(function(w){ return w.name === weatherSel.value; });
-    return preset ? preset.types : [];
   }
 
   // ========== 招式行管理 ==========
@@ -820,19 +901,17 @@
     var buffType = data.buffType || 'attack';
     var buffPower = data.buffPower || 1.5;
     var isBuff = category === '变化';
-
+    var typeColor = TYPE_COLORS[type] || '#666';
     var categoryLabel = isBuff ? 'Buff' : category;
-    var categoryClass = isBuff ? 'tag-buff' : (category === '物理' ? 'tag-physical' : 'tag-special');
-    var summaryText = name || '新招式';
+    var categoryClass = isBuff ? 'move-buff' : (category === '物理' ? 'move-physical' : 'move-special');
 
-    row.innerHTML = '<div class="move-row-header" data-toggle="' + rowId + '">' +
-      '<div class="move-row-summary">' +
-      '<span class="mv-name">' + summaryText + '</span>' +
-      '<span class="move-tag ' + categoryClass + '">' + categoryLabel + '</span>' +
-      '<span class="move-tag tag-type">' + type + '</span>' +
-      (!isBuff ? '<span style="font-size:12px;color:var(--muted);">威力 ' + (power || '?') + '</span>' : '') +
+    row.innerHTML = '<div class="move-row-header ' + categoryClass + '">' +
+      '<div class="move-entry-left">' +
+      '<span class="move-entry-name">' + (name || '新招式') + '</span>' +
+      '<span class="move-entry-detail">' + (!isBuff ? '(' + (power || '?') + '威力，' + category + ')' : '(0威力，变化)') + '</span>' +
       '</div>' +
-      '<div style="display:flex;align-items:center;gap:4px;">' +
+      '<span class="type-tag" style="background-color:' + typeColor + ';">' + type + '</span>' +
+      '<div class="move-entry-actions">' +
       '<button class="delete-btn" data-delete="' + rowId + '" aria-label="删除">✕</button>' +
       '<span class="chevron" data-chevron="' + rowId + '">▼</span>' +
       '</div>' +
@@ -871,7 +950,8 @@
       row.dataset.expanded = isOpen ? 'true' : 'false';
     });
 
-    row.querySelector('.delete-btn').addEventListener('click', function(){
+    row.querySelector('.delete-btn').addEventListener('click', function(e){
+      e.stopPropagation();
       row.remove();
       updateMoveCount();
     });
@@ -915,13 +995,15 @@
     var category = row.querySelector('.mCategory').value;
     var power = row.querySelector('.mPower').value;
     var isBuff = category === '变化';
-    var categoryLabel = isBuff ? 'Buff' : category;
-    var categoryClass = isBuff ? 'tag-buff' : (category === '物理' ? 'tag-physical' : 'tag-special');
-    var summary = row.querySelector('.move-row-summary');
-    summary.innerHTML = '<span class="mv-name">' + name + '</span>' +
-      '<span class="move-tag ' + categoryClass + '">' + categoryLabel + '</span>' +
-      '<span class="move-tag tag-type">' + type + '</span>' +
-      (!isBuff ? '<span style="font-size:12px;color:var(--muted);">威力 ' + (power || '?') + '</span>' : '');
+    var typeColor = TYPE_COLORS[type] || '#666';
+    var categoryClass = isBuff ? 'move-buff' : (category === '物理' ? 'move-physical' : 'move-special');
+    var header = row.querySelector('.move-row-header');
+    header.className = 'move-row-header ' + categoryClass;
+    header.querySelector('.move-entry-name').textContent = name;
+    header.querySelector('.move-entry-detail').textContent = !isBuff ? '(' + (power || '?') + '威力，' + category + ')' : '(0威力，变化)';
+    var tag = header.querySelector('.type-tag');
+    tag.textContent = type;
+    tag.style.backgroundColor = typeColor;
   }
 
   function updateMoveCount() {
@@ -948,38 +1030,6 @@
     });
     return moves;
   }
-
-  // ========== 批量导入 ==========
-  batchImportBtn.addEventListener('click', function(){
-    var text = batchInput.value.trim();
-    if (!text) {
-      importStatus.textContent = '⚠️ 请先粘贴豆包识别结果';
-      return;
-    }
-    var lines = text.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
-    var imported = 0;
-    lines.forEach(function(line){
-      var parts = line.split(',').map(function(p){ return p.trim(); });
-      if (parts.length < 4) return;
-      var name = parts[0], type = parts[1], category = parts[2], power = parseFloat(parts[3]);
-      if (TYPES.indexOf(type) === -1 || ['物理','特殊','变化'].indexOf(category) === -1) return;
-      if (moveList.querySelectorAll('.move-row').length >= MAX_MOVES) return;
-      var data = { name:name, type:type, category:category, power: category === '变化' ? 0 : power };
-      if (category === '变化') {
-        data.buffType = parts[4] || 'attack';
-        data.buffPower = parseFloat(parts[5]) || 1.5;
-      }
-      createMoveRow(data);
-      imported++;
-    });
-    if (imported > 0) {
-      importStatus.textContent = '✅ 成功导入 ' + imported + ' 个招式';
-      batchInput.value = '';
-      updateAllMoveTypeOptions();
-    } else {
-      importStatus.textContent = '❌ 导入失败，请检查格式';
-    }
-  });
 
   // ========== 搜索 ==========
   moveSearch.addEventListener('input', function(){
@@ -1016,19 +1066,61 @@
     if (!e.target.closest('.search-wrapper')) searchResults.classList.add('hidden');
   });
 
+  // ========== 豆包粘贴解析 ==========
+  parsePasteBtn.addEventListener('click', function(){
+    var text = pasteInput.value.trim();
+    if (!text) return;
+    var lines = text.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+    var imported = 0;
+    lines.forEach(function(line){
+      var parts = line.split(',').map(function(p){ return p.trim(); });
+      if (parts.length < 4) return;
+      var name = parts[0];
+      var type = parts[1];
+      var category = parts[2];
+      var power = parseFloat(parts[3]);
+      if (!TYPES.includes(type) || !['物理','特殊','变化'].includes(category)) return;
+      if (moveList.querySelectorAll('.move-row').length >= MAX_MOVES) return;
+      var data = { name:name, type:type, category:category, power: category === '变化' ? 0 : power };
+      if (category === '变化') {
+        data.buffType = parts[4] || 'attack';
+        data.buffPower = parseFloat(parts[5]) || 1.5;
+      }
+      createMoveRow(data);
+      imported++;
+    });
+    if (imported > 0) {
+      pasteInput.value = '';
+      updateAllMoveTypeOptions();
+    } else {
+      alert('解析失败，请检查格式');
+    }
+  });
+
+  clearPasteBtn.addEventListener('click', function(){
+    pasteInput.value = '';
+  });
+
   // ========== 敌方属性 ==========
   function createEnemySet(type1, type2) {
     type1 = type1 || '无';
     type2 = type2 || '无';
     var div = document.createElement('div');
     div.className = 'enemy-set-row';
-    div.innerHTML = '<select class="enemyType1" style="flex:1;">' +
+    div.innerHTML = '<select class="enemyType1 bg-type" style="flex:1;">' +
       ['无'].concat(TYPES).map(function(t){ return '<option value="' + t + '"' + (t === type1 ? ' selected' : '') + '>' + t + '</option>'; }).join('') +
       '</select>' +
-      '<select class="enemyType2" style="flex:1;">' +
+      '<select class="enemyType2 bg-type" style="flex:1;">' +
       ['无'].concat(TYPES).map(function(t){ return '<option value="' + t + '"' + (t === type2 ? ' selected' : '') + '>' + t + '</option>'; }).join('') +
       '</select>' +
       '<button class="btn btn-sm btn-danger removeEnemySet" style="flex:0 0 auto;">✕</button>';
+    var sel1 = div.querySelector('.enemyType1');
+    var sel2 = div.querySelector('.enemyType2');
+    function updateBg(sel) { updateSelectBackground(sel); }
+    sel1.addEventListener('change', function(){ updateBg(sel1); });
+    sel2.addEventListener('change', function(){ updateBg(sel2); });
+    updateBg(sel1);
+    updateBg(sel2);
     div.querySelector('.removeEnemySet').addEventListener('click', function(){ div.remove(); });
     enemySetsDiv.appendChild(div);
   }
@@ -1221,13 +1313,22 @@
       var label = (es.type1 === '无' && es.type2 === '无') ? '无克制' : (es.type1 + (es.type2 !== '无' ? '/' + es.type2 : ''));
       html += '<h3 style="margin:8px 0;font-size:15px;font-weight:700;">🎯 敌方：' + label + '</h3>';
       top.forEach(function(r, rank){
-        var seqText = r.seq.map(function(m){
-          return m.category === '变化' ? '<b>' + m.name + '</b>(Buff)' : '<b>' + m.name + '</b>(' + m.type + '/' + m.power + ')';
-        }).join(' → ');
+        var movesetHtml = '<div class="result-moveset">';
+        r.seq.forEach(function(m){
+          var typeColor = TYPE_COLORS[m.type] || '#666';
+          var isBuff = m.category === '变化';
+          movesetHtml += '<div class="result-move-item">' +
+            '<span class="result-move-name">' + m.name + '</span>' +
+            '<span class="result-move-tag" style="background-color:' + typeColor + ';">' + m.type + '</span>' +
+            '<span style="color:#6B7280;font-size:12px;">' + (isBuff ? 'Buff' : m.power + '威力') + '</span>' +
+            '</div>';
+        });
+        movesetHtml += '</div>';
         html += '<div class="result-panel"><span class="rank-badge">第' + (rank+1) + '名</span>' +
           '<div class="total">' + formatDamage(r.total) + '</div>' +
-          '<div class="seq">' + seqText + '</div>' +
-          '<div class="detail">';
+          movesetHtml +
+          '<button class="result-detail-toggle" onclick="this.nextElementSibling.classList.toggle(\'show\');this.textContent=this.nextElementSibling.classList.contains(\'show\')?\'隐藏明细\':\'查看明细\';">查看明细</button>' +
+          '<div class="result-detail-section">';
         r.details.forEach(function(d){
           if (d.move.category === '变化') {
             html += '<div>' + d.move.name + '：伤害0（' + d.note + '）</div>';
@@ -1251,9 +1352,21 @@
     var es = getEnemySets();
     options.enemySet = es.length > 0 ? es[0] : { type1:'无', type2:'无' };
     var result = calcRound(seq, options);
+    var movesetHtml = '<div class="result-moveset">';
+    seq.forEach(function(m){
+      var typeColor = TYPE_COLORS[m.type] || '#666';
+      var isBuff = m.category === '变化';
+      movesetHtml += '<div class="result-move-item">' +
+        '<span class="result-move-name">' + m.name + '</span>' +
+        '<span class="result-move-tag" style="background-color:' + typeColor + ';">' + m.type + '</span>' +
+        '<span style="color:#6B7280;font-size:12px;">' + (isBuff ? 'Buff' : m.power + '威力') + '</span>' +
+        '</div>';
+    });
+    movesetHtml += '</div>';
     var html = '<div class="result-panel"><div class="total">一轮总威力：' + formatDamage(result.total) + '</div>' +
-      '<div class="seq">' + seq.map(function(m){ return '<b>' + m.name + '</b>(' + m.type + '/' + (m.category === '变化' ? 'Buff' : m.power) + ')'; }).join(' → ') + '</div>' +
-      '<div class="detail">';
+      movesetHtml +
+      '<button class="result-detail-toggle" onclick="this.nextElementSibling.classList.toggle(\'show\');this.textContent=this.nextElementSibling.classList.contains(\'show\')?\'隐藏明细\':\'查看明细\';">查看明细</button>' +
+      '<div class="result-detail-section">';
     result.details.forEach(function(d){
       if (d.move.category === '变化') html += '<div>' + d.move.name + '：伤害0（' + d.note + '）</div>';
       else html += '<div>' + d.move.name + '：' + formatDamage(d.damage) + '（' + d.note + '）</div>';
