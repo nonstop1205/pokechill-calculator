@@ -245,7 +245,7 @@
       border-radius: 10px;
       padding: 10px 12px;
       cursor: pointer;
-      border: 2px solid #4B5563;
+      border: 2px solid #ccc; /* 默认边框，会被内联样式覆盖 */
       transition: transform 0.1s ease, border-color 0.2s ease;
       position: relative;
     }
@@ -253,10 +253,6 @@
     .move-row-header:active {
       transform: scale(0.98);
     }
-
-    .move-row-header.move-physical { border-color: #22C55E; }
-    .move-row-header.move-special { border-color: #A855F7; }
-    .move-row-header.move-buff { border-color: #9CA3AF; }
 
     .move-entry-left {
       display: flex;
@@ -386,22 +382,6 @@
       margin-bottom: 6px;
     }
 
-    .result-info {
-      font-size: 13px;
-      color: #374151;
-      margin-bottom: 6px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 12px;
-      align-items: center;
-    }
-    .result-info span {
-      background: #E0E7FF;
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-weight: 600;
-    }
-
     .result-moveset {
       margin: 8px 0;
       padding: 6px 0;
@@ -413,14 +393,11 @@
       gap: 8px;
       padding: 8px 12px;
       border-radius: 10px;
-      border: 2px solid #4B5563;
+      border: 2px solid #ccc; /* 默认，会被内联样式覆盖 */
       background: #fff;
       margin-bottom: 6px;
       font-size: 14px;
     }
-    .result-move-item.move-physical { border-color: #22C55E; }
-    .result-move-item.move-special { border-color: #A855F7; }
-    .result-move-item.move-buff { border-color: #9CA3AF; }
 
     .result-move-name {
       font-weight: 700;
@@ -440,7 +417,8 @@
       font-size: 11px;
       font-weight: 700;
       color: #fff;
-      margin-left: 2px;
+      margin-left: auto; /* 推到最右侧 */
+      flex-shrink: 0;
     }
 
     .result-detail-toggle {
@@ -467,6 +445,33 @@
       border-radius: 8px;
     }
     .result-detail-section.show { display: block; }
+
+    .result-info {
+      font-size: 13px;
+      color: #374151;
+      margin-bottom: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      align-items: center;
+    }
+    .result-info span {
+      background: #E0E7FF;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .show-more-btn {
+      font-size: 12px;
+      color: var(--primary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      margin: 4px 0;
+      padding: 0;
+    }
 
     /* 底部固定操作栏 */
     .bottom-bar {
@@ -901,10 +906,8 @@
     var buffPower = data.buffPower || 1.5;
     var isBuff = category === '变化';
     var typeColor = TYPE_COLORS[type] || '#666';
-    var categoryLabel = isBuff ? 'Buff' : category;
-    var categoryClass = isBuff ? 'move-buff' : (category === '物理' ? 'move-physical' : 'move-special');
 
-    row.innerHTML = '<div class="move-row-header ' + categoryClass + '">' +
+    row.innerHTML = '<div class="move-row-header" style="border-color:' + typeColor + '">' +
       '<button class="delete-btn" data-delete="' + rowId + '" aria-label="删除">✕</button>' +
       '<div class="move-entry-left">' +
       '<span class="move-entry-name">' + (name || '新招式') + '</span>' +
@@ -993,9 +996,8 @@
     var power = row.querySelector('.mPower').value;
     var isBuff = category === '变化';
     var typeColor = TYPE_COLORS[type] || '#666';
-    var categoryClass = isBuff ? 'move-buff' : (category === '物理' ? 'move-physical' : 'move-special');
     var header = row.querySelector('.move-row-header');
-    header.className = 'move-row-header ' + categoryClass;
+    header.style.borderColor = typeColor;
     header.querySelector('.move-entry-name').textContent = name;
     header.querySelector('.move-entry-detail').textContent = !isBuff ? '(' + (power || '?') + '威力，' + category + ')' : '(0威力，变化)';
     var tag = header.querySelector('.type-tag');
@@ -1335,41 +1337,79 @@
       var opts = Object.assign({}, options, { enemySet: es });
       var results = enumerateAll(moves, opts);
       if (results.length === 0) return;
-      var top = results.slice(0, 3);
       var label = (es.type1 === '无' && es.type2 === '无') ? '无克制' : (es.type1 + (es.type2 !== '无' ? '/' + es.type2 : ''));
+
+      // 敌方标题和宝可梦属性信息
       html += '<h3 style="margin:8px 0;font-size:15px;font-weight:700;">🎯 敌方：' + label + '</h3>';
-      top.forEach(function(r, rank){
-        var movesetHtml = '<div class="result-moveset">';
-        r.seq.forEach(function(m){
-          var typeColor = TYPE_COLORS[m.type] || '#666';
-          var isBuff = m.category === '变化';
-          var borderClass = isBuff ? 'move-buff' : (m.category === '物理' ? 'move-physical' : 'move-special');
-          movesetHtml += '<div class="result-move-item ' + borderClass + '">' +
-            '<span class="result-move-name">' + m.name + '</span>' +
-            '<span class="result-move-detail">' + (isBuff ? '(0威力，变化)' : '(' + m.power + '威力，' + m.category + ')') + '</span>' +
-            '<span class="result-move-tag" style="background-color:' + typeColor + ';">' + m.type + '</span>' +
-            '</div>';
-        });
-        movesetHtml += '</div>';
-        html += '<div class="result-panel"><span class="rank-badge">第' + (rank+1) + '名</span>' +
-          '<div class="total">' + formatDamage(r.total) + '</div>' +
-          '<div class="result-info">' +
-          '<span>宝可梦属性：' + pokeInfo + '</span>' +
-          '<span>攻击：' + atkVal + '</span>' +
-          '<span>特攻：' + spaVal + '</span>' +
-          '</div>' +
-          movesetHtml +
-          '<button class="result-detail-toggle" onclick="this.nextElementSibling.classList.toggle(\'show\');this.textContent=this.nextElementSibling.classList.contains(\'show\')?\'隐藏明细\':\'查看明细\';">查看明细</button>' +
-          '<div class="result-detail-section">';
-        r.details.forEach(function(d){
-          if (d.move.category === '变化') {
-            html += '<div>' + d.move.name + '：伤害0（' + d.note + '）</div>';
-          } else {
-            html += '<div>' + d.move.name + '：' + formatDamage(d.damage) + '（' + d.note + '）</div>';
-          }
-        });
-        html += '</div></div>';
+      html += '<div class="result-info">' +
+        '<span>宝可梦属性：' + pokeInfo + '</span>' +
+        '<span>攻击：' + atkVal + '</span>' +
+        '<span>特攻：' + spaVal + '</span>' +
+        '</div>';
+
+      // 默认显示第一名
+      var first = results[0];
+      var movesetHtml = '<div class="result-moveset">';
+      first.seq.forEach(function(m){
+        var typeColor = TYPE_COLORS[m.type] || '#666';
+        var isBuff = m.category === '变化';
+        movesetHtml += '<div class="result-move-item" style="border-color:' + typeColor + '">' +
+          '<span class="result-move-name">' + m.name + '</span>' +
+          '<span class="result-move-detail">' + (isBuff ? '(0威力，变化)' : '(' + m.power + '威力，' + m.category + ')') + '</span>' +
+          '<span class="result-move-tag" style="background-color:' + typeColor + ';">' + m.type + '</span>' +
+          '</div>';
       });
+      movesetHtml += '</div>';
+
+      html += '<div class="result-panel"><span class="rank-badge">第1名</span>' +
+        '<div class="total">' + formatDamage(first.total) + '</div>' +
+        movesetHtml +
+        '<button class="result-detail-toggle" onclick="this.nextElementSibling.classList.toggle(\'show\');this.textContent=this.nextElementSibling.classList.contains(\'show\')?\'隐藏明细\':\'查看明细\';">查看明细</button>' +
+        '<div class="result-detail-section">';
+      first.details.forEach(function(d){
+        if (d.move.category === '变化') {
+          html += '<div>' + d.move.name + '：伤害0（' + d.note + '）</div>';
+        } else {
+          html += '<div>' + d.move.name + '：' + formatDamage(d.damage) + '（' + d.note + '）</div>';
+        }
+      });
+      html += '</div></div>';
+
+      // 如果有更多名次，添加“显示更多排名”按钮
+      if (results.length > 1) {
+        html += '<button class="show-more-btn" onclick="this.nextElementSibling.classList.toggle(\'hidden\');this.textContent=this.nextElementSibling.classList.contains(\'hidden\')?\'显示更多排名\':\'收起排名\';">显示更多排名</button>';
+        html += '<div class="hidden">';
+        // 第2、3名等
+        for (var idx = 1; idx < Math.min(results.length, 3); idx++) {
+          var r = results[idx];
+          var movesetHtml2 = '<div class="result-moveset">';
+          r.seq.forEach(function(m){
+            var typeColor = TYPE_COLORS[m.type] || '#666';
+            var isBuff = m.category === '变化';
+            movesetHtml2 += '<div class="result-move-item" style="border-color:' + typeColor + '">' +
+              '<span class="result-move-name">' + m.name + '</span>' +
+              '<span class="result-move-detail">' + (isBuff ? '(0威力，变化)' : '(' + m.power + '威力，' + m.category + ')') + '</span>' +
+              '<span class="result-move-tag" style="background-color:' + typeColor + ';">' + m.type + '</span>' +
+              '</div>';
+          });
+          movesetHtml2 += '</div>';
+          html += '<div class="result-panel"><span class="rank-badge">第' + (idx+1) + '名</span>' +
+            '<div class="total">' + formatDamage(r.total) + '</div>' +
+            movesetHtml2 +
+            '<button class="result-detail-toggle" onclick="this.nextElementSibling.classList.toggle(\'show\');this.textContent=this.nextElementSibling.classList.contains(\'show\')?\'隐藏明细\':\'查看明细\';">查看明细</button>' +
+            '<div class="result-detail-section">';
+          r.details.forEach(function(d){
+            if (d.move.category === '变化') {
+              html += '<div>' + d.move.name + '：伤害0（' + d.note + '）</div>';
+            } else {
+              html += '<div>' + d.move.name + '：' + formatDamage(d.damage) + '（' + d.note + '）</div>';
+            }
+          });
+          html += '</div></div>';
+        }
+        html += '</div>';
+      }
+
       html += '<hr style="margin:10px 0;border-color:var(--border);">';
     });
     resultsDiv.innerHTML = html || '<p class="muted">无结果</p>';
@@ -1395,8 +1435,7 @@
     seq.forEach(function(m){
       var typeColor = TYPE_COLORS[m.type] || '#666';
       var isBuff = m.category === '变化';
-      var borderClass = isBuff ? 'move-buff' : (m.category === '物理' ? 'move-physical' : 'move-special');
-      movesetHtml += '<div class="result-move-item ' + borderClass + '">' +
+      movesetHtml += '<div class="result-move-item" style="border-color:' + typeColor + '">' +
         '<span class="result-move-name">' + m.name + '</span>' +
         '<span class="result-move-detail">' + (isBuff ? '(0威力，变化)' : '(' + m.power + '威力，' + m.category + ')') + '</span>' +
         '<span class="result-move-tag" style="background-color:' + typeColor + ';">' + m.type + '</span>' +
