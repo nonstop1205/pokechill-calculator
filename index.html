@@ -239,10 +239,9 @@
     .move-row-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 8px;
-      background: #2C2C2C;
-      color: #fff;
+      background: #fff;
+      color: var(--text);
       border-radius: 10px;
       padding: 10px 12px;
       cursor: pointer;
@@ -268,7 +267,7 @@
     }
 
     .move-entry-name {
-      color: #fff;
+      color: var(--title);
       font-weight: 700;
       font-size: 15px;
       white-space: nowrap;
@@ -277,7 +276,7 @@
     }
 
     .move-entry-detail {
-      color: #9CA3AF;
+      color: var(--muted);
       font-size: 12px;
       white-space: nowrap;
     }
@@ -287,26 +286,20 @@
       margin-left: 2px;
     }
 
-    .move-entry-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
     .delete-btn {
       background: none;
       border: none;
       color: #9CA3AF;
       font-size: 16px;
       cursor: pointer;
-      padding: 6px 8px;
-      transition: color 0.2s;
+      padding: 4px 6px;
+      transition: color 0.2s, background 0.2s;
       flex-shrink: 0;
       border-radius: 6px;
+      order: -1; /* 移到最左边 */
     }
-    .delete-btn:hover { color: #FCA5A5; background: rgba(255,0,0,0.12); }
-    .delete-btn:active { color: #fff; background: rgba(255,0,0,0.25); }
+    .delete-btn:hover { color: #fff; background: #FCA5A5; }
+    .delete-btn:active { color: #fff; background: #F87171; }
 
     .chevron {
       font-size: 10px;
@@ -314,6 +307,7 @@
       transition: transform 0.2s ease;
       flex-shrink: 0;
       padding: 4px;
+      margin-left: auto; /* 推到最右 */
     }
     .chevron.open { transform: rotate(180deg); }
 
@@ -392,29 +386,51 @@
       margin-bottom: 6px;
     }
 
+    .result-info {
+      font-size: 13px;
+      color: #374151;
+      margin-bottom: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      align-items: center;
+    }
+    .result-info span {
+      background: #E0E7FF;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
     .result-moveset {
       margin: 8px 0;
-      padding: 10px 12px;
-      background: #fff;
-      border-radius: 10px;
-      border: 1px solid #E5E7EB;
+      padding: 6px 0;
     }
 
     .result-move-item {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 0;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 2px solid #4B5563;
+      background: #fff;
+      margin-bottom: 6px;
       font-size: 14px;
-      border-bottom: 1px solid #F3F4F6;
     }
-
-    .result-move-item:last-child { border-bottom: none; }
+    .result-move-item.move-physical { border-color: #22C55E; }
+    .result-move-item.move-special { border-color: #A855F7; }
+    .result-move-item.move-buff { border-color: #9CA3AF; }
 
     .result-move-name {
       font-weight: 700;
       color: var(--title);
       min-width: 80px;
+    }
+
+    .result-move-detail {
+      color: var(--muted);
+      font-size: 12px;
     }
 
     .result-move-tag {
@@ -427,24 +443,6 @@
       margin-left: 2px;
     }
 
-    .result-move-dmg {
-      margin-left: auto;
-      font-weight: 600;
-      color: var(--primary);
-      font-size: 13px;
-    }
-
-    .result-panel .rank-badge {
-      display: inline-block;
-      background: var(--primary);
-      color: white;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 999px;
-      margin-bottom: 4px;
-    }
-
     .result-detail-toggle {
       font-size: 12px;
       color: var(--muted);
@@ -455,6 +453,7 @@
       color: var(--primary);
       border: none;
       font-weight: 600;
+      margin-top: 4px;
     }
 
     .result-detail-section {
@@ -906,15 +905,13 @@
     var categoryClass = isBuff ? 'move-buff' : (category === '物理' ? 'move-physical' : 'move-special');
 
     row.innerHTML = '<div class="move-row-header ' + categoryClass + '">' +
+      '<button class="delete-btn" data-delete="' + rowId + '" aria-label="删除">✕</button>' +
       '<div class="move-entry-left">' +
       '<span class="move-entry-name">' + (name || '新招式') + '</span>' +
       '<span class="move-entry-detail">' + (!isBuff ? '(' + (power || '?') + '威力，' + category + ')' : '(0威力，变化)') + '</span>' +
       '</div>' +
       '<span class="type-tag" style="background-color:' + typeColor + ';">' + type + '</span>' +
-      '<div class="move-entry-actions">' +
-      '<button class="delete-btn" data-delete="' + rowId + '" aria-label="删除">✕</button>' +
       '<span class="chevron" data-chevron="' + rowId + '">▼</span>' +
-      '</div>' +
       '</div>' +
       '<div class="move-row-detail" data-detail="' + rowId + '">' +
       '<input class="mName" placeholder="招式名" value="' + name + '" style="flex:1 1 100px;">' +
@@ -1294,15 +1291,44 @@
 
   function formatDamage(v) { return Math.round(v * 100) / 100; }
 
+  function validateInputs(moves) {
+    var hasPhysical = moves.some(function(m){ return m.category === '物理'; });
+    var hasSpecial = moves.some(function(m){ return m.category === '特殊'; });
+    var atk = parseFloat(atkInput.value);
+    var spa = parseFloat(spaInput.value);
+
+    if (pokeType1.value === '无' && pokeType2.value === '无') {
+      alert('请先选择宝可梦属性');
+      return false;
+    }
+    if (hasPhysical && (!atk || atk <= 0)) {
+      alert('存在物理招式，请填写攻击值');
+      atkInput.focus();
+      return false;
+    }
+    if (hasSpecial && (!spa || spa <= 0)) {
+      alert('存在特殊招式，请填写特攻值');
+      spaInput.focus();
+      return false;
+    }
+    return true;
+  }
+
   function renderBest() {
     var moves = getMoves();
     if (moves.length < 4) {
       resultsDiv.innerHTML = '<p class="muted">至少需要4个有效招式</p>';
       return;
     }
+    if (!validateInputs(moves)) return;
+
     var options = getBaseOptions();
     var enemySets = getEnemySets();
     if (enemySets.length === 0) enemySets.push({ type1:'无', type2:'无' });
+
+    var pokeInfo = (pokeType1.value !== '无' ? pokeType1.value : '') + (pokeType2.value !== '无' ? '/' + pokeType2.value : '');
+    var atkVal = atkInput.value || '?';
+    var spaVal = spaInput.value || '?';
 
     var html = '';
     enemySets.forEach(function(es){
@@ -1317,15 +1343,21 @@
         r.seq.forEach(function(m){
           var typeColor = TYPE_COLORS[m.type] || '#666';
           var isBuff = m.category === '变化';
-          movesetHtml += '<div class="result-move-item">' +
+          var borderClass = isBuff ? 'move-buff' : (m.category === '物理' ? 'move-physical' : 'move-special');
+          movesetHtml += '<div class="result-move-item ' + borderClass + '">' +
             '<span class="result-move-name">' + m.name + '</span>' +
+            '<span class="result-move-detail">' + (isBuff ? '(0威力，变化)' : '(' + m.power + '威力，' + m.category + ')') + '</span>' +
             '<span class="result-move-tag" style="background-color:' + typeColor + ';">' + m.type + '</span>' +
-            '<span style="color:#6B7280;font-size:12px;">' + (isBuff ? 'Buff' : m.power + '威力') + '</span>' +
             '</div>';
         });
         movesetHtml += '</div>';
         html += '<div class="result-panel"><span class="rank-badge">第' + (rank+1) + '名</span>' +
           '<div class="total">' + formatDamage(r.total) + '</div>' +
+          '<div class="result-info">' +
+          '<span>宝可梦属性：' + pokeInfo + '</span>' +
+          '<span>攻击：' + atkVal + '</span>' +
+          '<span>特攻：' + spaVal + '</span>' +
+          '</div>' +
           movesetHtml +
           '<button class="result-detail-toggle" onclick="this.nextElementSibling.classList.toggle(\'show\');this.textContent=this.nextElementSibling.classList.contains(\'show\')?\'隐藏明细\':\'查看明细\';">查看明细</button>' +
           '<div class="result-detail-section">';
@@ -1347,23 +1379,37 @@
   function renderCurrent() {
     var moves = getMoves();
     if (moves.length === 0) { resultsDiv.innerHTML = '<p class="muted">请先添加招式</p>'; return; }
+    if (!validateInputs(moves)) return;
+
     var seq = moves.slice(0, 4);
     var options = getBaseOptions();
     var es = getEnemySets();
     options.enemySet = es.length > 0 ? es[0] : { type1:'无', type2:'无' };
     var result = calcRound(seq, options);
+
+    var pokeInfo = (pokeType1.value !== '无' ? pokeType1.value : '') + (pokeType2.value !== '无' ? '/' + pokeType2.value : '');
+    var atkVal = atkInput.value || '?';
+    var spaVal = spaInput.value || '?';
+
     var movesetHtml = '<div class="result-moveset">';
     seq.forEach(function(m){
       var typeColor = TYPE_COLORS[m.type] || '#666';
       var isBuff = m.category === '变化';
-      movesetHtml += '<div class="result-move-item">' +
+      var borderClass = isBuff ? 'move-buff' : (m.category === '物理' ? 'move-physical' : 'move-special');
+      movesetHtml += '<div class="result-move-item ' + borderClass + '">' +
         '<span class="result-move-name">' + m.name + '</span>' +
+        '<span class="result-move-detail">' + (isBuff ? '(0威力，变化)' : '(' + m.power + '威力，' + m.category + ')') + '</span>' +
         '<span class="result-move-tag" style="background-color:' + typeColor + ';">' + m.type + '</span>' +
-        '<span style="color:#6B7280;font-size:12px;">' + (isBuff ? 'Buff' : m.power + '威力') + '</span>' +
         '</div>';
     });
     movesetHtml += '</div>';
+
     var html = '<div class="result-panel"><div class="total">一轮总威力：' + formatDamage(result.total) + '</div>' +
+      '<div class="result-info">' +
+      '<span>宝可梦属性：' + pokeInfo + '</span>' +
+      '<span>攻击：' + atkVal + '</span>' +
+      '<span>特攻：' + spaVal + '</span>' +
+      '</div>' +
       movesetHtml +
       '<button class="result-detail-toggle" onclick="this.nextElementSibling.classList.toggle(\'show\');this.textContent=this.nextElementSibling.classList.contains(\'show\')?\'隐藏明细\':\'查看明细\';">查看明细</button>' +
       '<div class="result-detail-section">';
