@@ -15,8 +15,6 @@
   <link rel="apple-touch-icon" href="icon.svg">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
 
-  <!-- Tesseract.js OCR 库 -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     :root {
       --bg: #F3F4F6;
@@ -34,7 +32,6 @@
       --radius-input: 14px;
       --radius-btn: 12px;
       --shadow-card: 0 4px 20px rgba(0,0,0,0.06);
-      --shadow-hover: 0 4px 16px rgba(79,70,229,0.25);
     }
 
     * {
@@ -154,6 +151,13 @@
     textarea:focus {
       border-color: var(--border-focus);
       box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      font-size: 14px;
+      line-height: 1.6;
     }
 
     .btn {
@@ -346,37 +350,6 @@
     .search-item:hover, .search-item:active { background: #EEF2FF; }
     .search-item .si-type { color: var(--muted); font-size: 12px; margin-left: 4px; }
 
-    .ocr-area {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .ocr-preview {
-      max-width: 100%;
-      max-height: 160px;
-      border-radius: 10px;
-      margin-top: 10px;
-      display: none;
-      object-fit: contain;
-    }
-
-    .ocr-result-text {
-      background: #F9FAFB;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
-      font-size: 13px;
-      line-height: 1.6;
-      max-height: 120px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      word-break: break-all;
-      color: var(--muted);
-      margin-top: 8px;
-    }
-
     .result-panel {
       background: #EFF6FF;
       border: 1.5px solid #BFDBFE;
@@ -476,7 +449,7 @@
 <body>
 <div class="container">
   <div class="app-title">⚡ PokeChill 配招计算器</div>
-  <div class="app-subtitle">截图识别 · 最优配招 · 一轮总伤害</div>
+  <div class="app-subtitle">粘贴豆包识别结果 · 最优配招 · 一轮总伤害</div>
 
   <!-- 规则卡片 -->
   <div class="note">
@@ -486,20 +459,16 @@
     <b>敌方克制</b>：绝佳 ×1.5，不佳 ×0.5，免疫 ×0，双属性相乘
   </div>
 
-  <!-- OCR 截图识别 -->
+  <!-- 批量导入 -->
   <div class="card">
-    <h2><span class="icon">📸</span>截图导入招式</h2>
-    <p class="muted" style="margin-top:-6px;font-size:13px;">上传PokeChill招式页面截图，自动识别招式并填入</p>
-    <div class="ocr-area">
-      <input type="file" id="ocrInput" accept="image/*" style="display:none">
-      <button class="btn btn-primary" id="ocrBtn">
-        <span id="ocrBtnText">📷 上传截图</span>
-      </button>
-      <button class="btn btn-sm" id="ocrClearBtn" style="display:none;">清除</button>
+    <h2><span class="icon">📋</span>粘贴豆包识别结果</h2>
+    <p class="muted" style="margin-top:-6px;font-size:13px;">每行一个招式，格式：招式名,属性,物理/特殊/变化,威力[,buff类型,倍率]</p>
+    <textarea id="batchInput" placeholder="疯狂伏特,电,物理,120&#10;十万伏特,电,特殊,90&#10;铁尾,钢,物理,100&#10;剑舞,一般,变化,0,attack,2"></textarea>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-primary" id="batchImport">📥 批量导入</button>
+      <button class="btn btn-danger" id="clearAll">🗑 清空全部招式</button>
     </div>
-    <img id="ocrPreview" class="ocr-preview" alt="预览">
-    <div id="ocrResultText" class="ocr-result-text" style="display:none;"></div>
-    <div id="ocrStatus" class="muted" style="margin-top:8px;font-size:13px;"></div>
+    <div id="importStatus" class="muted" style="margin-top:8px;font-size:13px;"></div>
   </div>
 
   <!-- 搜索招式 -->
@@ -560,7 +529,6 @@
     <h2><span class="icon">📋</span>候选招式 <span id="moveCount" style="font-size:13px;color:var(--muted);font-weight:400;">(0/20)</span></h2>
     <div class="btn-row" style="margin-bottom:8px;">
       <button class="btn btn-sm" id="addMove">＋ 手动添加</button>
-      <button class="btn btn-sm btn-danger" id="clearAll">🗑 清空全部</button>
       <button class="btn btn-sm" id="expandAll">▾ 全部展开</button>
     </div>
     <div id="moveList"></div>
@@ -765,13 +733,9 @@
   var calcCurrentBtn = $('calcCurrent');
   var calcBestBtn = $('calcBest');
   var resultsDiv = $('results');
-  var ocrInput = $('ocrInput');
-  var ocrBtn = $('ocrBtn');
-  var ocrBtnText = $('ocrBtnText');
-  var ocrClearBtn = $('ocrClearBtn');
-  var ocrPreview = $('ocrPreview');
-  var ocrResultText = $('ocrResultText');
-  var ocrStatus = $('ocrStatus');
+  var batchInput = $('batchInput');
+  var batchImportBtn = $('batchImport');
+  var importStatus = $('importStatus');
 
   var MAX_MOVES = 20;
 
@@ -985,6 +949,38 @@
     return moves;
   }
 
+  // ========== 批量导入 ==========
+  batchImportBtn.addEventListener('click', function(){
+    var text = batchInput.value.trim();
+    if (!text) {
+      importStatus.textContent = '⚠️ 请先粘贴豆包识别结果';
+      return;
+    }
+    var lines = text.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+    var imported = 0;
+    lines.forEach(function(line){
+      var parts = line.split(',').map(function(p){ return p.trim(); });
+      if (parts.length < 4) return;
+      var name = parts[0], type = parts[1], category = parts[2], power = parseFloat(parts[3]);
+      if (TYPES.indexOf(type) === -1 || ['物理','特殊','变化'].indexOf(category) === -1) return;
+      if (moveList.querySelectorAll('.move-row').length >= MAX_MOVES) return;
+      var data = { name:name, type:type, category:category, power: category === '变化' ? 0 : power };
+      if (category === '变化') {
+        data.buffType = parts[4] || 'attack';
+        data.buffPower = parseFloat(parts[5]) || 1.5;
+      }
+      createMoveRow(data);
+      imported++;
+    });
+    if (imported > 0) {
+      importStatus.textContent = '✅ 成功导入 ' + imported + ' 个招式';
+      batchInput.value = '';
+      updateAllMoveTypeOptions();
+    } else {
+      importStatus.textContent = '❌ 导入失败，请检查格式';
+    }
+  });
+
   // ========== 搜索 ==========
   moveSearch.addEventListener('input', function(){
     var query = moveSearch.value.trim().toLowerCase();
@@ -1019,98 +1015,6 @@
   document.addEventListener('click', function(e){
     if (!e.target.closest('.search-wrapper')) searchResults.classList.add('hidden');
   });
-
-  // ========== OCR 截图识别 ==========
-  ocrBtn.addEventListener('click', function(){ ocrInput.click(); });
-
-  ocrInput.addEventListener('change', function(e){
-    var file = e.target.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function(ev){
-      ocrPreview.src = ev.target.result;
-      ocrPreview.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-    ocrClearBtn.style.display = 'inline-flex';
-
-    ocrBtnText.innerHTML = '<span class="spinner"></span> 识别中...';
-    ocrBtn.disabled = true;
-    ocrStatus.textContent = '正在识别图片文字，请稍候...';
-
-    Tesseract.createWorker('chi_sim').then(function(worker){
-      return worker.recognize(file).then(function(result){
-        var text = result.data.text;
-        worker.terminate();
-        ocrResultText.textContent = text;
-        ocrResultText.style.display = 'block';
-        ocrStatus.textContent = '✅ 识别完成，正在解析招式...';
-        var parsed = parseOCRText(text);
-        if (parsed.length > 0) {
-          var added = 0;
-          parsed.forEach(function(moveData){
-            if (moveList.querySelectorAll('.move-row').length < MAX_MOVES) {
-              createMoveRow(moveData);
-              added++;
-            }
-          });
-          ocrStatus.textContent = '✅ 成功识别并导入 ' + added + ' 个招式。请检查属性是否正确，如有误可手动修改。';
-        } else {
-          ocrStatus.textContent = '⚠️ 未识别到招式，请检查截图是否清晰，或手动添加招式。';
-        }
-      }).catch(function(err){
-        console.error(err);
-        ocrStatus.textContent = '❌ 识别失败：' + (err.message || err);
-      });
-    }).catch(function(err){
-      console.error(err);
-      ocrStatus.textContent = '❌ 初始化识别引擎失败：' + (err.message || err);
-    }).finally(function(){
-      ocrBtnText.textContent = '📷 上传截图';
-      ocrBtn.disabled = false;
-      ocrInput.value = '';
-    });
-  });
-
-  ocrClearBtn.addEventListener('click', function(){
-    ocrPreview.style.display = 'none';
-    ocrPreview.src = '';
-    ocrResultText.style.display = 'none';
-    ocrResultText.textContent = '';
-    ocrStatus.textContent = '';
-    ocrClearBtn.style.display = 'none';
-  });
-
-  function parseOCRText(text) {
-    var moves = [];
-    var lines = text.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
-    lines.forEach(function(line){
-      var nameMatch = line.match(/([\u4e00-\u9fa5]{2,8})/);
-      if (!nameMatch) return;
-      var name = nameMatch[1];
-      var dbMatch = MOVE_DB.find(function(m){ return m.name === name; });
-      if (dbMatch) {
-        moves.push({ name:dbMatch.name, type:dbMatch.type, category:dbMatch.category, power:dbMatch.power, buffType:dbMatch.buffType || null, buffPower:dbMatch.buffPower || 1 });
-        return;
-      }
-      var powerMatch = line.match(/(\d+)/);
-      var power = powerMatch ? parseInt(powerMatch[1]) : 0;
-      var category = '物理';
-      if (line.indexOf('特殊') !== -1) category = '特殊';
-      else if (line.indexOf('变化') !== -1 || line.indexOf('Buff') !== -1 || line.indexOf('状态') !== -1) category = '变化';
-      if (power > 0 || category === '变化') {
-        moves.push({
-          name: name,
-          type: '一般',
-          category: category,
-          power: category === '变化' ? 0 : power,
-          buffType: category === '变化' ? 'attack' : null,
-          buffPower: category === '变化' ? 1.5 : 1
-        });
-      }
-    });
-    return moves;
-  }
 
   // ========== 敌方属性 ==========
   function createEnemySet(type1, type2) {
