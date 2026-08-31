@@ -593,7 +593,7 @@ function renderBest() {
     html += '</div></div>';
 
     if (results.length > 1) {
-      html += '<button class="show-more-btn" onclick="this.nextElementSibling.classList.toggle(\'hidden\');this.textContent=this.nextElementSibling.classList.contains(\'hidden\')?\'显示更多排名\':\'收起排名\';">显示更多排名</button>';
+      html += '<button class="show-more-btn" onclick="this.nextElementSibling.classList.toggle(\'hidden\');this.textContent=this.nextElementSibling.classList.contains(\'hidden\')?\'▾ 查看第2、3名\':\'▴ 收起排名\';">▾ 查看第2、3名</button>';
       html += '<div class="hidden">';
       for (var idx = 1; idx < Math.min(results.length, 3); idx++) {
         var r = results[idx];
