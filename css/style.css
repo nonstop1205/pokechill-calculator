@@ -231,8 +231,8 @@ select.bg-type { transition: background-color 0.3s, color 0.3s; }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #FEE2E2;
-  color: #B91C1C;
+  background: transparent;
+  color: #9CA3AF;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -240,9 +240,9 @@ select.bg-type { transition: background-color 0.3s, color 0.3s; }
   transition: all 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
-
 .move-row-delete:active {
-  background: #FECACA;
+  background: #F3F4F6;
+  color: #6B7280;
   transform: scale(0.95);
 }
 
