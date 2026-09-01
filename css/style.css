@@ -242,6 +242,7 @@ select.bg-type { transition: background-color 0.3s, color 0.3s; }
   gap: 6px;
   flex: 1;
   min-width: 0;
+  margin-right: 8px; /* 新增：与属性标签保持间距 */
 }
 
 .move-entry-name {
@@ -251,6 +252,7 @@ select.bg-type { transition: background-color 0.3s, color 0.3s; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 80px; /* 新增：与结果条目一致 */
 }
 
 .move-entry-detail {
@@ -261,7 +263,7 @@ select.bg-type { transition: background-color 0.3s, color 0.3s; }
 
 .move-entry-type {
   flex-shrink: 0;
-  margin-left: 2px;
+  margin-left: auto; /* 新增：自动推到右侧，靠近箭头 */
 }
 
 .delete-btn {
