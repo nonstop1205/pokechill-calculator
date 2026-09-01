@@ -126,32 +126,35 @@ function createMoveRow(data) {
   var isBuff = category === '变化';
   var typeColor = TYPE_COLORS[type] || '#666';
 
-  row.innerHTML = '<div class="move-row-header" style="border-color:' + typeColor + '">' +
-    '<button class="delete-btn" data-delete="' + rowId + '" aria-label="删除">✕</button>' +
-    '<div class="move-entry-left">' +
-    '<span class="move-entry-name">' + (name || '新招式') + '</span>' +
-    '<span class="move-entry-detail">' + (!isBuff ? '(' + (power || '?') + '威力，' + category + ')' : '(0威力，变化)') + '</span>' +
+  // 结构：左侧独立删除按钮 + 右侧卡片（同一行）
+  row.innerHTML = '<div class="move-row-wrapper">' +
+    '<button class="move-row-delete" data-delete="' + rowId + '" aria-label="删除">✕</button>' +
+    '<div class="move-row-header" style="border-color:' + typeColor + '">' +
+      '<div class="move-entry-left">' +
+        '<span class="move-entry-name">' + (name || '新招式') + '</span>' +
+        '<span class="move-entry-detail">' + (!isBuff ? '(' + (power || '?') + '威力，' + category + ')' : '(0威力，变化)') + '</span>' +
+      '</div>' +
+      '<span class="type-tag" style="background-color:' + typeColor + ';">' + type + '</span>' +
+      '<span class="chevron" data-chevron="' + rowId + '">▼</span>' +
     '</div>' +
-    '<span class="type-tag" style="background-color:' + typeColor + ';">' + type + '</span>' +
-    '<span class="chevron" data-chevron="' + rowId + '">▼</span>' +
-    '</div>' +
-    '<div class="move-row-detail" data-detail="' + rowId + '">' +
+  '</div>' +
+  '<div class="move-row-detail" data-detail="' + rowId + '">' +
     '<input class="mName" placeholder="招式名" value="' + name + '" style="flex:1 1 100px;">' +
     '<select class="mType"></select>' +
     '<select class="mCategory">' +
-    '<option value="物理"' + (category === '物理' ? ' selected' : '') + '>物理</option>' +
-    '<option value="特殊"' + (category === '特殊' ? ' selected' : '') + '>特殊</option>' +
-    '<option value="变化"' + (category === '变化' ? ' selected' : '') + '>变化</option>' +
+      '<option value="物理"' + (category === '物理' ? ' selected' : '') + '>物理</option>' +
+      '<option value="特殊"' + (category === '特殊' ? ' selected' : '') + '>特殊</option>' +
+      '<option value="变化"' + (category === '变化' ? ' selected' : '') + '>变化</option>' +
     '</select>' +
     '<input class="mPower" type="number" min="0" placeholder="威力" value="' + power + '"' + (isBuff ? ' disabled' : '') + ' style="width:70px;">' +
     (isBuff ? '<div class="buff-config-inline"><select class="buffType">' +
-    '<option value="attack"' + (buffType === 'attack' ? ' selected' : '') + '>攻+</option>' +
-    '<option value="special"' + (buffType === 'special' ? ' selected' : '') + '>特+</option>' +
-    '<option value="both"' + (buffType === 'both' ? ' selected' : '') + '>双+</option>' +
-    '<option value="weather"' + (buffType === 'weather' ? ' selected' : '') + '>天气</option>' +
+      '<option value="attack"' + (buffType === 'attack' ? ' selected' : '') + '>攻+</option>' +
+      '<option value="special"' + (buffType === 'special' ? ' selected' : '') + '>特+</option>' +
+      '<option value="both"' + (buffType === 'both' ? ' selected' : '') + '>双+</option>' +
+      '<option value="weather"' + (buffType === 'weather' ? ' selected' : '') + '>天气</option>' +
     '</select>' +
     '<input class="buffPower" type="number" step="0.1" min="0" value="' + buffPower + '" style="width:60px;"></div>' : '') +
-    '</div>';
+  '</div>';
 
   moveList.appendChild(row);
 
@@ -163,13 +166,13 @@ function createMoveRow(data) {
   var chevron = row.querySelector('.chevron');
 
   header.addEventListener('click', function(e) {
-    if (e.target.closest('.delete-btn')) return;
+    // 删除按钮在外部，不会触发这里
     var isOpen = detail.classList.toggle('show');
     chevron.classList.toggle('open', isOpen);
     row.dataset.expanded = isOpen ? 'true' : 'false';
   });
 
-  row.querySelector('.delete-btn').addEventListener('click', function(e){
+  row.querySelector('.move-row-delete').addEventListener('click', function(e){
     e.stopPropagation();
     row.remove();
     updateMoveCount();
@@ -510,6 +513,12 @@ function enumerateAll(moves, options) {
                 total: result.total,
                 details: result.details
               };
+            } else if (result.total === bestForCombo.total && isPowerAscending(seq) && !isPowerAscending(bestForCombo.seq)) {
+              bestForCombo = {
+                seq: seq,
+                total: result.total,
+                details: result.details
+              };
             }
           });
 
@@ -530,14 +539,12 @@ function enumerateAll(moves, options) {
   return results;
 }
 
-function reorderForDisplay(seq) {
-  var buffMove = seq.find(function(m){ return m.category === '变化'; });
+function isPowerAscending(seq) {
   var damageMoves = seq.filter(function(m){ return m.category !== '变化'; });
-  damageMoves.sort(function(a, b){ return a.power - b.power; });
-  if (buffMove) {
-    return [buffMove].concat(damageMoves);
+  for (var i = 1; i < damageMoves.length; i++) {
+    if (damageMoves[i].power < damageMoves[i-1].power) return false;
   }
-  return damageMoves;
+  return true;
 }
 
 function formatDamage(v) { return Math.round(v * 100) / 100; }
@@ -596,9 +603,8 @@ function renderBest() {
       '</div>';
 
     var first = results[0];
-    var displaySeq = reorderForDisplay(first.seq);
     var movesetHtml = '<div class="result-moveset">';
-    displaySeq.forEach(function(m){
+    first.seq.forEach(function(m){
       var typeColor = TYPE_COLORS[m.type] || '#666';
       var isBuff = m.category === '变化';
       movesetHtml += '<div class="result-move-item" style="border-color:' + typeColor + '">' +
@@ -628,9 +634,8 @@ function renderBest() {
       html += '<div class="hidden">';
       for (var idx = 1; idx < Math.min(results.length, 3); idx++) {
         var r = results[idx];
-        var displaySeq2 = reorderForDisplay(r.seq);
         var movesetHtml2 = '<div class="result-moveset">';
-        displaySeq2.forEach(function(m){
+        r.seq.forEach(function(m){
           var typeColor = TYPE_COLORS[m.type] || '#666';
           var isBuff = m.category === '变化';
           movesetHtml2 += '<div class="result-move-item" style="border-color:' + typeColor + '">' +
