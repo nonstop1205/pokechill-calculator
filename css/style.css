@@ -218,7 +218,37 @@ select.bg-type { transition: background-color 0.3s, color 0.3s; }
   padding: 0;
 }
 
+.move-row-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.move-row-delete {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FEE2E2;
+  color: #B91C1C;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.move-row-delete:active {
+  background: #FECACA;
+  transform: scale(0.95);
+}
+
 .move-row-header {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -242,7 +272,7 @@ select.bg-type { transition: background-color 0.3s, color 0.3s; }
   gap: 6px;
   flex: 1;
   min-width: 0;
-  margin-right: 8px; /* 新增：与属性标签保持间距 */
+  margin-right: 8px;
 }
 
 .move-entry-name {
@@ -252,7 +282,7 @@ select.bg-type { transition: background-color 0.3s, color 0.3s; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 80px; /* 新增：与结果条目一致 */
+  min-width: 80px;
 }
 
 .move-entry-detail {
@@ -263,23 +293,8 @@ select.bg-type { transition: background-color 0.3s, color 0.3s; }
 
 .move-entry-type {
   flex-shrink: 0;
-  margin-left: auto; /* 新增：自动推到右侧，靠近箭头 */
+  margin-left: auto;
 }
-
-.delete-btn {
-  background: none;
-  border: none;
-  color: #9CA3AF;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 4px 6px;
-  transition: color 0.2s, background 0.2s;
-  flex-shrink: 0;
-  border-radius: 6px;
-  order: -1; /* 移到最左边 */
-}
-.delete-btn:hover { color: #fff; background: #FCA5A5; }
-.delete-btn:active { color: #fff; background: #F87171; }
 
 .chevron {
   font-size: 10px;
@@ -287,8 +302,9 @@ select.bg-type { transition: background-color 0.3s, color 0.3s; }
   transition: transform 0.2s ease;
   flex-shrink: 0;
   padding: 4px;
-  margin-left: auto; /* 推到最右 */
+  margin-left: auto;
 }
+
 .chevron.open { transform: rotate(180deg); }
 
 /* 编辑详情区域 */
@@ -377,7 +393,7 @@ select.bg-type { transition: background-color 0.3s, color 0.3s; }
   gap: 8px;
   padding: 8px 12px;
   border-radius: 10px;
-  border: 2px solid #ccc; /* 默认，会被内联样式覆盖 */
+  border: 2px solid #ccc;
   background: #fff;
   margin-bottom: 6px;
   font-size: 14px;
@@ -401,7 +417,7 @@ select.bg-type { transition: background-color 0.3s, color 0.3s; }
   font-size: 11px;
   font-weight: 700;
   color: #fff;
-  margin-left: auto; /* 推到最右侧 */
+  margin-left: auto;
   flex-shrink: 0;
 }
 
