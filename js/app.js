@@ -513,7 +513,7 @@ function enumerateAll(moves, options) {
                 total: result.total,
                 details: result.details
               };
-            } else if (result.total === bestForCombo.total && isPowerAscending(seq) && !isPowerAscending(bestForCombo.seq)) {
+            } else if (result.total === bestForCombo.total && countInversions(seq) < countInversions(bestForCombo.seq)) {
               bestForCombo = {
                 seq: seq,
                 total: result.total,
@@ -539,12 +539,15 @@ function enumerateAll(moves, options) {
   return results;
 }
 
-function isPowerAscending(seq) {
-  var damageMoves = seq.filter(function(m){ return m.category !== '变化'; });
-  for (var i = 1; i < damageMoves.length; i++) {
-    if (damageMoves[i].power < damageMoves[i-1].power) return false;
+function countInversions(seq) {
+  var powers = seq.filter(function(m){ return m.category !== '变化'; }).map(function(m){ return m.power; });
+  var inv = 0;
+  for (var i = 0; i < powers.length; i++) {
+    for (var j = i + 1; j < powers.length; j++) {
+      if (powers[i] > powers[j]) inv++;
+    }
   }
-  return true;
+  return inv;
 }
 
 function formatDamage(v) { return Math.round(v * 100) / 100; }
