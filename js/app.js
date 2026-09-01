@@ -248,6 +248,7 @@ function getMoves() {
   });
   return moves;
 }
+
 // ========== 搜索 ==========
 moveSearch.addEventListener('input', function(){
   var query = moveSearch.value.trim().toLowerCase();
@@ -481,7 +482,8 @@ function permute(arr) {
 function enumerateAll(moves, options) {
   var n = moves.length;
   if (n < 4) return [];
-  var results = [];
+  var comboBestMap = {};
+
   for (var i = 0; i < n; i++) {
     for (var j = i+1; j < n; j++) {
       for (var k = j+1; k < n; k++) {
@@ -489,6 +491,7 @@ function enumerateAll(moves, options) {
           var combo = [moves[i], moves[j], moves[k], moves[l]];
           var buffCount = combo.filter(function(m){ return m.category === '变化'; }).length;
           if (buffCount > 1) continue;
+
           var sequences;
           if (buffFirst.checked && buffCount === 1) {
             var buffMove = combo.find(function(m){ return m.category === '变化'; });
@@ -497,16 +500,44 @@ function enumerateAll(moves, options) {
           } else {
             sequences = permute(combo);
           }
+
+          var bestForCombo = null;
           sequences.forEach(function(seq){
             var result = calcRound(seq, options);
-            results.push({ seq: seq, total: result.total, details: result.details });
+            if (!bestForCombo || result.total > bestForCombo.total) {
+              bestForCombo = {
+                seq: seq,
+                total: result.total,
+                details: result.details
+              };
+            }
           });
+
+          var key = combo.map(function(m){ return m.name; }).sort().join('|');
+          if (!comboBestMap[key] || bestForCombo.total > comboBestMap[key].total) {
+            comboBestMap[key] = bestForCombo;
+          }
         }
       }
     }
   }
+
+  var results = Object.keys(comboBestMap).map(function(key){
+    return comboBestMap[key];
+  });
+
   results.sort(function(a, b){ return b.total - a.total; });
   return results;
+}
+
+function reorderForDisplay(seq) {
+  var buffMove = seq.find(function(m){ return m.category === '变化'; });
+  var damageMoves = seq.filter(function(m){ return m.category !== '变化'; });
+  damageMoves.sort(function(a, b){ return a.power - b.power; });
+  if (buffMove) {
+    return [buffMove].concat(damageMoves);
+  }
+  return damageMoves;
 }
 
 function formatDamage(v) { return Math.round(v * 100) / 100; }
@@ -564,10 +595,10 @@ function renderBest() {
       '<span>特攻：' + spaVal + '</span>' +
       '</div>';
 
-    // 默认显示第一名
     var first = results[0];
+    var displaySeq = reorderForDisplay(first.seq);
     var movesetHtml = '<div class="result-moveset">';
-    first.seq.forEach(function(m){
+    displaySeq.forEach(function(m){
       var typeColor = TYPE_COLORS[m.type] || '#666';
       var isBuff = m.category === '变化';
       movesetHtml += '<div class="result-move-item" style="border-color:' + typeColor + '">' +
@@ -597,8 +628,9 @@ function renderBest() {
       html += '<div class="hidden">';
       for (var idx = 1; idx < Math.min(results.length, 3); idx++) {
         var r = results[idx];
+        var displaySeq2 = reorderForDisplay(r.seq);
         var movesetHtml2 = '<div class="result-moveset">';
-        r.seq.forEach(function(m){
+        displaySeq2.forEach(function(m){
           var typeColor = TYPE_COLORS[m.type] || '#666';
           var isBuff = m.category === '变化';
           movesetHtml2 += '<div class="result-move-item" style="border-color:' + typeColor + '">' +
